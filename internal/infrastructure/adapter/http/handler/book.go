@@ -22,7 +22,7 @@ func NewBookHandler(bookService services.BookService) *BookHandler {
 
 func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	// ambil query param
-	name := r.URL.Query().Get("name")
+	name := r.URL.Query().Get("title")
 	sort := r.URL.Query().Get("sort")
 	order := r.URL.Query().Get("order")
 
@@ -46,15 +46,8 @@ func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// response
-
 	res := dto.NewAPIResponse(true, "books retrieved successfully", books)
-
-	// kembalikan response json
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(res); err != nil {
-		http.Error(w, "failed to encode response", http.StatusInternalServerError)
-		return
-	}
+	dto.WriteJSONResponse(w, http.StatusOK, res)
 }
 
 func (h *BookHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +56,8 @@ func (h *BookHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// validasi request json
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		res := dto.NewAPIResponse(false, "invalid request body", nil)
+		dto.WriteJSONResponse(w, http.StatusBadRequest, res)
 		return
 	}
 
@@ -71,28 +65,22 @@ func (h *BookHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// validasi isi request
 	if err := req.Validate(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		res := dto.NewAPIResponse(false, err.Error(), nil)
+		dto.WriteJSONResponse(w, http.StatusBadRequest, res)
 		return
 	}
 
 	// panggil service untuk create book
 	if err := h.bookService.CreateBook(req.Title, req.Author, req.PublishedYear); err != nil {
-		http.Error(w, "failed to create book", http.StatusInternalServerError)
+		res := dto.NewAPIResponse(false, "failed to create book", nil)
+		dto.WriteJSONResponse(w, http.StatusInternalServerError, res)
 		return
 	}
 
 	//response
 	res := dto.NewAPIResponse(true, "book created successfully", nil)
 
-	// kembalikan response json
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	if err := json.NewEncoder(w).Encode(res); err != nil {
-		http.Error(w, "failed to encode response", http.StatusInternalServerError)
-		return
-	}
-
+	dto.WriteJSONResponse(w, http.StatusCreated, res)
 }
 
 func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +89,8 @@ func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// konversi id ke int
 	id, err := strconv.Atoi(idsStr)
 	if err != nil {
-		http.Error(w, "invalid book id", http.StatusBadRequest)
+		res := dto.NewAPIResponse(false, "invalid book id", nil)
+		dto.WriteJSONResponse(w, http.StatusBadRequest, res)
 		return
 	}
 
@@ -110,7 +99,8 @@ func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// validasi request json
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		res := dto.NewAPIResponse(false, "invalid request body", nil)
+		dto.WriteJSONResponse(w, http.StatusBadRequest, res)
 		return
 	}
 
@@ -118,16 +108,44 @@ func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// validasi isi request
 	if err := req.Validate(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		res := dto.NewAPIResponse(false, err.Error(), nil)
+		dto.WriteJSONResponse(w, http.StatusBadRequest, res)
 		return
 	}
 
 	// panggil service untuk update book
-	// misal id diambil dari URL param, disini hardcode aja 1
 	if err := h.bookService.UpdateBook(id, req.Title, req.Author, req.PublishedYear); err != nil {
-		http.Error(w, "failed to update book", http.StatusInternalServerError)
+		res := dto.NewAPIResponse(false, "failed to update book", nil)
+		dto.WriteJSONResponse(w, http.StatusInternalServerError, res)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	//response
+	res := dto.NewAPIResponse(true, "book updated successfully", nil)
+
+	dto.WriteJSONResponse(w, http.StatusOK, res)
+}
+
+func (h *BookHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	// ambil id dari URL param
+	idsStr := chi.URLParam(r, "id")
+	// konversi id ke int
+	id, err := strconv.Atoi(idsStr)
+	if err != nil {
+		res := dto.NewAPIResponse(false, "invalid book id", nil)
+		dto.WriteJSONResponse(w, http.StatusBadRequest, res)
+		return
+	}
+
+	// panggil service untuk delete book
+	if err := h.bookService.DeleteBook(id); err != nil {
+		res := dto.NewAPIResponse(false, "failed to delete book", nil)
+		dto.WriteJSONResponse(w, http.StatusInternalServerError, res)
+		return
+	}
+
+	//response
+	res := dto.NewAPIResponse(true, "book deleted successfully", nil)
+
+	dto.WriteJSONResponse(w, http.StatusOK, res)
 }

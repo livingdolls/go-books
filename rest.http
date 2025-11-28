@@ -10,3 +10,16 @@ Content-Type: application/json
 
 ### Get All Books
 GET http://localhost:8182/books
+
+### Update Book
+PUT http://localhost:8182/books/1
+Content-Type: application/json
+
+{
+  "title": "The Go Programming Language (Updated)",
+  "author": "Alan A. A. Donovan and Brian W. Kernighan",
+  "published_year": 2016
+}
+
+### Delete Book
+DELETE http://localhost:8182/books/1

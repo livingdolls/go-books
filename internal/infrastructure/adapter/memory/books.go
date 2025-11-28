@@ -2,6 +2,7 @@ package memory
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/livingdolls/go-books/internal/domain"
 	"github.com/livingdolls/go-books/internal/infrastructure/storage"
@@ -52,7 +53,8 @@ func (i *bookRepository) GetAll(name *string, sort *string, order *string) ([]do
 	for _, book := range i.storage {
 		// filter by name kalo ada
 		if name != nil {
-			if book.Title != *name {
+			if !strings.Contains(strings.ToLower(book.Title), strings.ToLower(*name)) {
+
 				continue
 			}
 		}
@@ -81,6 +83,7 @@ func (i *bookRepository) GetAll(name *string, sort *string, order *string) ([]do
 		}
 	}
 
+	// jika sorting ada dan sorting by title
 	if sort != nil && *sort == "title" {
 		// Simple bubble sort
 		for j := 0; j < len(books)-1; j++ {
@@ -92,6 +95,28 @@ func (i *bookRepository) GetAll(name *string, sort *string, order *string) ([]do
 					}
 				} else {
 					if books[k].Title > books[k+1].Title {
+						shouldSwap = true
+					}
+				}
+				if shouldSwap {
+					books[k], books[k+1] = books[k+1], books[k]
+				}
+			}
+		}
+	}
+
+	// default sorting
+	if sort == nil || *sort == "newest" {
+		// Simple sort
+		for j := 0; j < len(books)-1; j++ {
+			for k := 0; k < len(books)-j-1; k++ {
+				shouldSwap := false
+				if order != nil && *order == "desc" {
+					if books[k].Id < books[k+1].Id {
+						shouldSwap = true
+					}
+				} else {
+					if books[k].Id > books[k+1].Id {
 						shouldSwap = true
 					}
 				}
