@@ -1,0 +1,12 @@
+### Create Book
+POST http://localhost:8182/books
+Content-Type: application/json
+
+{
+  "title": "The Go Programming Language",
+  "author": "Alan A. A. Donovan",
+  "published_year": 2015
+}
+
+### Get All Books
+GET http://localhost:8182/books

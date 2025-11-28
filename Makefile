@@ -1,0 +1,10 @@
+run:
+	go run cmd/main.go
+
+build:
+	go build -o main cmd/main.go
+
+test:
+	go test -v -cover ./...
+
+.PHONY: run build test
