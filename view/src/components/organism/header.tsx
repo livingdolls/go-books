@@ -5,36 +5,25 @@ import {
 } from "@/components/ui/input-group";
 import { ArrowDownAZ, ArrowDownZA, SearchIcon } from "lucide-react";
 import { FormAddBooks } from "../moleculs/form-add-books";
-import type { Book, GetAllBookReqeuest } from "../../types/book";
+import { useBookFilterStore } from "@/store/bookFilterStore";
 import { SortComponent } from "../moleculs/sort-component";
 
 type Props = {
-  handleChangeForm: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  bookRequest: Omit<Book, "id">;
   handleSubmit: () => void;
-  handleSearchFilter: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  filter: GetAllBookReqeuest;
-  setOrder: () => void;
-  setSortBy: (sortBy: GetAllBookReqeuest["sortBy"]) => void;
 };
 
-export const Header = ({
-  handleChangeForm,
-  bookRequest,
-  handleSubmit,
-  handleSearchFilter,
-  filter,
-  setOrder,
-  setSortBy,
-}: Props) => {
+export const Header = ({ handleSubmit }: Props) => {
+  const { filter, setFilter } = useBookFilterStore();
+  const handleSearchFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter({ ...filter, title: e.target.value });
+  };
+  const setOrder = () => {
+    setFilter({ ...filter, order: filter.order === "desc" ? "asc" : "desc" });
+  };
   return (
-    <header className="p-6 border-b border-border flex items-center justify-start gap-2">
+    <header className="py-6 border-b border-border flex items-center justify-start gap-2 sticky top-0 bg-white z-10">
       <div>
-        <FormAddBooks
-          handleChangeForm={handleChangeForm}
-          bookRequest={bookRequest}
-          handleSubmit={handleSubmit}
-        />
+        <FormAddBooks handleSubmit={handleSubmit} />
       </div>
 
       <div>
@@ -50,7 +39,7 @@ export const Header = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <SortComponent setSortBy={setSortBy} sortBy={filter.sortBy} />
+        <SortComponent />
         <button className="cursor-pointer" onClick={setOrder}>
           {filter.order === "asc" ? (
             <ArrowDownZA size={16} />

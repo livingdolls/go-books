@@ -4,31 +4,26 @@ import BookCard from "../moleculs/book-card";
 import React from "react";
 import { DeleteDialog } from "../moleculs/delete-dialog";
 import { FormUpdate } from "../moleculs/form-update";
+import { useBookFormStore } from "@/store/bookFormStore";
+import { useBookFilterStore } from "@/store/bookFilterStore";
 
 type ContentProps = {
   loading: boolean;
   error: boolean;
   data: TApiResponse<Book[]> | undefined;
-  setSelectedBookId: React.Dispatch<React.SetStateAction<number>>;
   handleDelete: () => void;
-  updateDialogOpen: boolean;
-  setUpdateDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  formUpdate: Book;
-  setFormUpdate: React.Dispatch<React.SetStateAction<Book>>;
   handleUpdateSubmit: () => void;
 };
 export const Content = ({
   loading,
   error,
   data,
-  setSelectedBookId,
   handleDelete,
-  updateDialogOpen,
-  setUpdateDialogOpen,
-  formUpdate,
-  setFormUpdate,
   handleUpdateSubmit,
 }: ContentProps) => {
+  const { updateDialogOpen, setUpdateDialogOpen, formUpdate, setFormUpdate } =
+    useBookFormStore();
+  const { setSelectedBookId } = useBookFilterStore();
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
 
   const handleDeleteAction = (bookId: number) => {
@@ -41,6 +36,14 @@ export const Content = ({
     setDeleteDialogOpen(false);
   };
 
+  const handleChangeForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormUpdate({
+      ...formUpdate,
+      [name]: name === "published_year" ? Number(value) : value,
+    });
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -49,7 +52,7 @@ export const Content = ({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4 mt-10">
       {data?.data.map((book) => (
         <BookCard
           key={book.id}
@@ -69,15 +72,7 @@ export const Content = ({
       <FormUpdate
         open={updateDialogOpen}
         onOpenChange={setUpdateDialogOpen}
-        handleChangeForm={(e) =>
-          setFormUpdate((prev) => ({
-            ...prev,
-            [e.target.name]:
-              e.target.name === "published_year"
-                ? Number(e.target.value)
-                : e.target.value,
-          }))
-        }
+        handleChangeForm={handleChangeForm}
         onConfirm={handleUpdateSubmit}
         formUpdate={formUpdate}
       />

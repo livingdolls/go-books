@@ -11,24 +11,26 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Book } from "../../types/book";
+import { useBookFormStore } from "@/store/bookFormStore";
+import { CirclePlus } from "lucide-react";
 
-type Props = {
-  handleChangeForm: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  bookRequest: Omit<Book, "id">;
-  handleSubmit: () => void;
-};
-
-export const FormAddBooks = ({
-  handleChangeForm,
-  bookRequest,
-  handleSubmit,
-}: Props) => {
+export function FormAddBooks({ handleSubmit }: { handleSubmit: () => void }) {
+  const { bookRequest, setBookRequest } = useBookFormStore();
+  const handleChangeForm = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setBookRequest({
+      ...bookRequest,
+      [name]: name === "published_year" ? Number(value) : value,
+    });
+  };
   return (
     <Dialog>
       <form onSubmit={handleSubmit}>
         <DialogTrigger asChild>
-          <Button className="bg-black">Add Book</Button>
+          <Button className="bg-black">
+            <span className="hidden md:block">Add Book</span>
+            <CirclePlus />
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -78,4 +80,4 @@ export const FormAddBooks = ({
       </form>
     </Dialog>
   );
-};
+}

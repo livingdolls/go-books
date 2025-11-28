@@ -17,7 +17,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
-  formUpdate: Omit<Book, "id">;
+  formUpdate: Book;
 };
 
 export const FormUpdate = ({

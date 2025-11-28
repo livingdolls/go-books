@@ -5,8 +5,8 @@ import React from "react";
 type BookCardProps = {
   book: Book;
   handleDelete: () => void;
-  setUpdateDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setFormUpdate: React.Dispatch<React.SetStateAction<Book>>;
+  setUpdateDialogOpen: (open: boolean) => void;
+  setFormUpdate: (book: Book) => void;
 };
 
 const BookCard: React.FC<BookCardProps> = ({
@@ -35,7 +35,7 @@ const BookCard: React.FC<BookCardProps> = ({
 
       <div className="flex flex-row gap-3">
         <button
-          className="w-full flex items-center justify-center gap-2 tpy-2 rounded bg-white border border-black text-black capitalize cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-2 rounded bg-white border border-black text-black capitalize cursor-pointer"
           onClick={() => {
             setFormUpdate({
               id: book.id,
