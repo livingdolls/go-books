@@ -7,15 +7,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBookFormStore } from "@/store/bookFormStore";
-import { CirclePlus } from "lucide-react";
+import { useNetworkStore } from "@/store/networkStore";
+import { LoaderCircle } from "lucide-react";
 
 export function FormAddBooks({ handleSubmit }: { handleSubmit: () => void }) {
-  const { bookRequest, setBookRequest } = useBookFormStore();
+  const { bookRequest, setBookRequest, setDialogRequestOpen, dialogRequest } = useBookFormStore();
+  const {isLoading} = useNetworkStore();
   const handleChangeForm = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setBookRequest({
@@ -24,14 +25,8 @@ export function FormAddBooks({ handleSubmit }: { handleSubmit: () => void }) {
     });
   };
   return (
-    <Dialog>
+    <Dialog open={dialogRequest} onOpenChange={setDialogRequestOpen}>
       <form onSubmit={handleSubmit}>
-        <DialogTrigger asChild>
-          <Button className="bg-black">
-            <span className="hidden md:block">Add Book</span>
-            <CirclePlus />
-          </Button>
-        </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add Books</DialogTitle>
@@ -72,8 +67,9 @@ export function FormAddBooks({ handleSubmit }: { handleSubmit: () => void }) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" onClick={handleSubmit}>
+            <Button disabled={isLoading} type="submit" onClick={handleSubmit}>
               Save
+              <LoaderCircle className={isLoading ? "animate-spin block" : "hidden"} />
             </Button>
           </DialogFooter>
         </DialogContent>

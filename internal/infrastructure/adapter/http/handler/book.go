@@ -20,6 +20,11 @@ func NewBookHandler(bookService services.BookService) *BookHandler {
 	}
 }
 
+// GetAll handles the retrieval of all books with optional filtering and sorting.
+// Query Parameters:
+// - title: filter books by title (optional)
+// - sort: field to sort by, e.g., "title" or "published_year" (optional)
+// - order: sort order, either "asc" or "desc" (optional)
 func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	// ambil query param
 	name := r.URL.Query().Get("title")
@@ -50,6 +55,15 @@ func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	dto.WriteJSONResponse(w, http.StatusOK, res)
 }
 
+// Create handles the creation of a new book.
+// It expects a JSON body with the book details.
+// Example JSON body:
+//
+//	{
+//	    "title": "Book Title",
+//	    "author": "Author Name",
+//	    "published_year": 2023
+//	}
 func (h *BookHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// validasi input
 	var req dto.CreateBookDTO
@@ -83,6 +97,15 @@ func (h *BookHandler) Create(w http.ResponseWriter, r *http.Request) {
 	dto.WriteJSONResponse(w, http.StatusCreated, res)
 }
 
+// Update handles the update of an existing book.
+// It expects a JSON body with the updated book details.
+// Example JSON body:
+//
+//	{
+//	    "title": "Updated Book Title",
+//	    "author": "Updated Author Name",
+//	    "published_year": 2024
+//	}
 func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// ambil id dari URL param
 	idsStr := chi.URLParam(r, "id")
@@ -126,6 +149,8 @@ func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 	dto.WriteJSONResponse(w, http.StatusOK, res)
 }
 
+// Delete handles the deletion of an existing book.
+// It expects the book ID as a URL parameter.
 func (h *BookHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	// ambil id dari URL param
 	idsStr := chi.URLParam(r, "id")

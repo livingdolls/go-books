@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/livingdolls/go-books/internal/infrastructure/adapter/http/handler"
+	"github.com/livingdolls/go-books/internal/infrastructure/adapter/http/middleware"
 )
 
 func NewRouter(book handler.BookHandler) *chi.Mux {
@@ -18,6 +19,9 @@ func NewRouter(book handler.BookHandler) *chi.Mux {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+
+	// logger middleware
+	r.Use(middleware.Logger)
 
 	r.Get("/books", book.GetAll)
 	r.Post("/books", book.Create)

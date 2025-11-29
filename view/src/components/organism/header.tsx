@@ -3,10 +3,12 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { ArrowDownAZ, ArrowDownZA, SearchIcon } from "lucide-react";
+import { ArrowDownAZ, ArrowDownZA, CirclePlus, SearchIcon } from "lucide-react";
 import { FormAddBooks } from "../moleculs/form-add-books";
 import { useBookFilterStore } from "@/store/bookFilterStore";
 import { SortComponent } from "../moleculs/sort-component";
+import { Button } from "../ui/button";
+import { useBookFormStore } from "@/store/bookFormStore";
 
 type Props = {
   handleSubmit: () => void;
@@ -14,6 +16,7 @@ type Props = {
 
 export const Header = ({ handleSubmit }: Props) => {
   const { filter, setFilter } = useBookFilterStore();
+  const {setDialogRequestOpen} = useBookFormStore();
   const handleSearchFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter({ ...filter, title: e.target.value });
   };
@@ -23,7 +26,13 @@ export const Header = ({ handleSubmit }: Props) => {
   return (
     <header className="py-6 border-b border-border flex items-center justify-start gap-2 sticky top-0 bg-white z-10">
       <div>
-        <FormAddBooks handleSubmit={handleSubmit} />
+        <Button className="bg-black"
+          onClick={() => setDialogRequestOpen(true)}
+        >
+          <span className="hidden md:block">Add Book</span>
+          <CirclePlus />
+        </Button>
+
       </div>
 
       <div>
@@ -48,6 +57,8 @@ export const Header = ({ handleSubmit }: Props) => {
           )}
         </button>
       </div>
+
+      <FormAddBooks handleSubmit={handleSubmit} />
     </header>
   );
 };

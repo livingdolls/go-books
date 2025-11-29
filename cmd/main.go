@@ -1,20 +1,30 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/livingdolls/go-books/internal/applications/services"
+	"github.com/livingdolls/go-books/internal/infrastructure/adapter/http"
+	"github.com/livingdolls/go-books/internal/infrastructure/adapter/http/handler"
+	"github.com/livingdolls/go-books/internal/infrastructure/adapter/memory"
 	"github.com/livingdolls/go-books/internal/infrastructure/server"
+	"github.com/livingdolls/go-books/internal/infrastructure/storage"
 )
 
 func main() {
-	fmt.Println("Hello, World!")
-	svr := server.NewServer()
+	//dummy DB
+	db := storage.BooksDB{}
 
-	go func() {
-		if err := svr.Start(":8182"); err != nil {
-			fmt.Println("Error starting server:", err)
-		}
-	}()
+	// dependencies wiring
+	booksRepo := memory.NewInMemoryBookRepository(db)
+	bookService := services.NewBookService(booksRepo)
+	booksHandler := handler.NewBookHandler(bookService)
 
-	select {}
+	// Initialize HTTP router
+	r := http.NewRouter(*booksHandler)
+
+	// Start the server
+	svr := server.NewAppServer(":8182", r, db)
+
+	if err := svr.Start(); err != nil {
+		panic(err)
+	}
 }

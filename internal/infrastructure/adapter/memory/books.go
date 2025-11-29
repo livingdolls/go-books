@@ -2,7 +2,9 @@ package memory
 
 import (
 	"errors"
+	sortSlice "sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/livingdolls/go-books/internal/domain"
 	"github.com/livingdolls/go-books/internal/infrastructure/storage"
@@ -85,24 +87,33 @@ func (i *bookRepository) GetAll(name *string, sort *string, order *string) ([]do
 
 	// jika sorting ada dan sorting by title
 	if sort != nil && *sort == "title" {
-		// Simple bubble sort
-		for j := 0; j < len(books)-1; j++ {
-			for k := 0; k < len(books)-j-1; k++ {
-				shouldSwap := false
+		sortSlice.Slice(books, func(i, j int) bool {
+			ti := strings.TrimSpace(books[i].Title)
+			tj := strings.TrimSpace(books[j].Title)
+
+			// get first huruf
+			ri, _ := utf8.DecodeRuneInString(ti)
+			rj, _ := utf8.DecodeRuneInString(tj)
+
+			// to lowerkase
+			sri := strings.ToLower(string(ri))
+			srj := strings.ToLower(string(rj))
+
+			// jika first huruf sama, seluruh title
+			if sri == srj {
 				if order != nil && *order == "desc" {
-					if books[k].Title < books[k+1].Title {
-						shouldSwap = true
-					}
-				} else {
-					if books[k].Title > books[k+1].Title {
-						shouldSwap = true
-					}
+					return strings.ToLower(ti) > strings.ToLower(tj)
 				}
-				if shouldSwap {
-					books[k], books[k+1] = books[k+1], books[k]
-				}
+
+				return strings.ToLower(ti) < strings.ToLower(tj)
 			}
-		}
+
+			if order != nil && *order == "desc" {
+				return sri > srj
+			}
+
+			return sri < srj
+		})
 	}
 
 	// default sorting

@@ -4,10 +4,14 @@ import { useDeleteBook } from "./useDeleteBook";
 import { useUpdateBook } from "./useUpdateBook";
 import { useBookFilterStore } from "@/store/bookFilterStore";
 import { useBookFormStore } from "@/store/bookFormStore";
+import { useNetworkStore } from "@/store/networkStore";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 export const useBooksZustand = () => {
-  const { bookRequest, formUpdate, setUpdateDialogOpen } = useBookFormStore();
+  const { bookRequest, setBookRequest, formUpdate, setUpdateDialogOpen, setDialogRequestOpen} = useBookFormStore();
   const { filter, selectedBookId } = useBookFilterStore();
+  const {setLoading} = useNetworkStore();
 
   const mutate = useAddBook(bookRequest);
   const deleteMutation = useDeleteBook(selectedBookId);
@@ -17,6 +21,10 @@ export const useBooksZustand = () => {
     published_year: formUpdate.published_year,
   });
   const { data, isLoading, isError } = useGetBook(filter);
+
+  useEffect(() => {
+    setLoading(mutate.isPending)
+  }, [mutate.isPending])
 
   const validateForm = () => {
     return (
@@ -35,33 +43,67 @@ export const useBooksZustand = () => {
     );
   };
 
+  const resetForm = () => {
+    setBookRequest({
+      title: "",
+      author: "",
+      published_year: 2012,
+    })
+  }
+
+  //on submit form create book
   const handleSubmit = () => {
     if (!validateForm()) {
-      alert("Please fill in all fields correctly.");
+      toast.error("Please fill in all fields correctly.");
       return;
     }
-    mutate.mutate();
+    mutate.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("successsfully add book")
+        setDialogRequestOpen(false)
+        resetForm()
+      }, 
+      onError: () => {
+        toast.error("failed to create book")
+      }
+    });
   };
 
+  // on update form update book
   const handleUpdateSubmit = () => {
     if (!validateUpdateForm()) {
-      alert("Please fill in all fields correctly.");
+      toast.error("Please fill in all fields correctly.");
       return;
     }
     if (formUpdate.id === 0) {
-      alert("Invalid book ID for update.");
+      toast.error("Invalid book ID for update.");
       return;
     }
-    updateMutation.mutate();
-    if (updateMutation.isSuccess) setUpdateDialogOpen(false);
+    updateMutation.mutate(undefined, {
+      onSuccess: () => {
+        setUpdateDialogOpen(false)
+        toast.success("successfully update book")        
+      },
+      onError: () => {
+        toast.error("failed to update book")
+      }
+    });
   };
 
+  // on delete book
   const handleDelete = () => {
     if (selectedBookId === 0) {
-      alert("No book selected for deletion.");
+      toast.error("No book selected for deletion.");
       return;
     }
-    deleteMutation.mutate();
+    deleteMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Book is deleted")
+      },
+      onError: () => {
+        toast.error("failed to delete book")
+      }
+    });
   };
 
   return {
